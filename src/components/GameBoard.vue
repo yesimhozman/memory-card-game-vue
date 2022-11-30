@@ -3,20 +3,29 @@ import CardView from "./CardView.vue";
 import cardData from "../data/memoryCards8.js";
 
 export default {
+ 
   components: {
     CardView,
   },
   data() {
     return {
+      endmessage: `end-message`,
       cardsData: cardData.concat(cardData),
       matchedPairs: 0,
       cardOne: "",
       cardTwo: "",
       disableDeck: false,
+      cardDiv: document.querySelector(".game-board"),
+      welcome: document.getElementById("welcome"),
+      end: document.getElementById("end"),
+      startTime: "",
+      start: document.getElementById("start"),
+      restart: document.getElementById("restart"),
     };
   },
   mounted() {
     this.shuffleCards();
+   
   },
   methods: {
     shuffleCards() {
@@ -54,8 +63,7 @@ export default {
         this.matchedPairs++; // if the card images match, we can increment the global `matchedPairs` variable by 1 match
         if (this.matchedPairs == 8) {
           // if your number of matches is 8, you've made all the matches! Game Won!
-          console.log(`YOU WIN!`);
-          return; // for now, lets call this game over, end this function and do nothing else.
+          return this.gameOver();
         }
         // everything below will execute if the game has not yet been won...
         this.cardOne.classList.add("matched"); // add a class "matched" so that the flipCard function will not run when these are clicked
@@ -80,26 +88,51 @@ export default {
         return;
       }, 1200);
     },
+    startGame() {
+  console.log("Game started!");
+  this.$el.querySelector(".game-board").classList.remove("hidden");
+  this.startTime = new Date().getTime();
+  this.$el.querySelector("#welcome").classList.add("hidden");
+
+},
+gameOver() {
+  this.startTime;
+  const elapsedTime = new Date().getTime() - this.startTime;
+  this.$el.querySelector("#end") = `<img src="https://media.tenor.com/5sR40D64YeAAAAAM/tbbt-the-big-bang-theory.gif"><span class="congrats">Congratz! <i class="confeti"></i><br> <p>You finished in ${elapsedTime / 1000} seconds.</p></span> <button id="restart">Play Again<i class="rocket"></i></button>`;
+  this.$el.querySelector(".game-board").classList.add("hidden");
+},
   },
 };
 </script>
 
 <template>
-  <div class="game-board">
-    <ul class="cards">
-      <li
-        v-for="(cardInfo, index) in cardsData"
-        :key="index"
-        class="card"
-        @click="flipCard"
-      >
-        <CardView viewType="front" />
-        <CardView
-          viewType="back"
-          :imageUrl="cardInfo.url"
-          :imageAltText="cardInfo.altText"
-        />
-      </li>
-    </ul>
+  <div>
+    <div id="welcome">
+      <div class="welcoming-text">
+        <h1>Hi there, welcome to memory game</h1>
+        <img class="icon" src="images/waving.png" />
+      </div>
+      <button type="button" id="start" class="button" v-on:click="startGame">
+        Start Game<i class="rocket"></i>
+      </button>
+    </div>
+    <div class="game-board hidden">
+      <ul class="cards">
+        <li
+          v-for="(cardInfo, index) in cardsData"
+          :key="index"
+          class="card"
+          @click="flipCard"
+        >
+          <CardView viewType="front" />
+          <CardView
+            viewType="back"
+            :imageUrl="cardInfo.url"
+            :imageAltText="cardInfo.altText"
+          />
+        </li>
+      </ul>
+    </div>
+    <div id="end" v-html="end-message"></div>
   </div>
 </template>
